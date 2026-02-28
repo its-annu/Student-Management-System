@@ -20,9 +20,7 @@ import java.sql.SQLException;
 public class DatabaseConnection {
 
     // ── Edit these to match your MySQL setup ─────────────────────────────────
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/student_management"
-                                        + "?useSSL=false&serverTimezone=UTC"
-                                        + "&allowPublicKeyRetrieval=true";
+    private static final String DB_URL  = "https://student-management-system-production-f623.up.railway.app/";
     private static final String DB_USER = "root";   // your MySQL username
     private static final String DB_PASS = "123456";        // your MySQL password
     // ─────────────────────────────────────────────────────────────────────────
@@ -47,3 +45,4 @@ public class DatabaseConnection {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
     }
 }
+
