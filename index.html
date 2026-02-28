@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
+<html>
+    <head>
+        <title>Student Management System</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- FIX 1: Removed space in rel=" stylesheet" → rel="stylesheet" -->
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="app">
+        <!-- =====================SIDEBAR===================================== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-mark">🎓</div>
+                    <div class="logo-text">
+                        <span class="logo-name">Academic</span>
+                        <span class="logo-sub">Student Portal</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="nav">
+                <span class="nav-section-label">Overview</span>
+                <div class="nav-link active" data-page="dashboard">
+                    <span class="nav-icon">◈</span> Dashboard
+                </div>
+                
+                <span class="nav-section-label">Records</span>
+                <div class="nav-link" data-page="students">
+                    <span class="nav-icon">👤</span>Students
+                    <span class="nav-badge" id="nav-students-count">0</span>
+                </div>
+                <div class="nav-link" data-page="departments">
+                    <span class="nav-icon">🏛</span> Departments
+                </div>
+                <div class="nav-link" data-page="courses">
+                    <span class="nav-icon">📚</span>Courses  
+                </div>
+                
+                <span class="nav-section-label">Analytics</span>
+                <div class="nav-link" data-page="reports">
+                    <span class="nav-icon">📊</span> Reports
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-chip">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <div class="user-name">Admin User</div>
+                        <div class="user-role">System Administrator</div>
+                    </div>
+                    <span style="color:var(--text-3);font-size:14px;">⚙</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ==============================MAIN================================= -->
+        <main class="main">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <!-- FIX 2: "toper-title" → "topbar-title" -->
+                <div class="topbar-title" id="page-title">Dashboard</div>
+                <div class="search-bar" id="global-search-wrap" style="display: none">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="global-search" placeholder="Search Students...">
+                </div>
+                <button class="btn btn-primary" id="add-student-btn" style="display: none" onclick="openAddModal()">+ Add Student</button>
+            </div>
+            
+            <!-- =======================DASHBOARD PAGE=========================== -->
+            <!-- FIX 3: "page-content" must match CSS — also in CSS change .PAGE-content to .page-content -->
+            <div class="page-content active" id="page-dashboard">
+
+                <!-- FIX 9: stats-grid only contains the 4 stat cards, charts-grid is OUTSIDE/AFTER -->
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card violet" style="animation-delay:0s">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-value" id="stat-total">-</div>
+                        <div class="stat-label">Total Students</div>
+                        <!-- FIX 6: "stat change up" → "stat-change up" -->
+                        <span class="stat-change up">↑ Enrolled</span>
+                    </div>
+
+                    <!-- FIX 4: "stat-caard teal" → "stat-card teal" -->
+                    <div class="stat-card teal" style="animation-delay:0.1s">
+                        <div class="stat-icon">✅</div>
+                        <!-- FIX 5: "stat -value" → "stat-value" -->
+                        <div class="stat-value" id="stat-active">-</div>
+                        <div class="stat-label">Active Students</div>
+                        <div class="stat-change up">↑ This semester</div>
+                    </div>
+
+                    <div class="stat-card amber" style="animation-delay:0.2s">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value" id="stat-gpa">-</div>
+                        <div class="stat-label">Average GPA</div>
+                        <!-- FIX 8: "nuetral" → "neutral" -->
+                        <span class="stat-change neutral">Overall</span>
+                    </div>
+
+                    <div class="stat-card rose" style="animation-delay:0.3s">
+                        <div class="stat-icon">🏛</div>
+                        <div class="stat-value" id="stat-depts">-</div>
+                        <!-- FIX 7: clas="stat-label" → class="stat-label" -->
+                        <div class="stat-label">Departments</div>
+                        <span class="stat-change neutral">Active</span>
+                    </div>
+                </div>
+                <!-- END stats-grid -->
+
+                <!-- FIX 9 CONTINUED: charts-grid is NOW outside stats-grid -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">Students by Department</div>
+                        <div class="dept-bars" id="dept-chart"></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Enrollment Status</div>
+                        <div class="donut-wrap">
+                            <!-- FIX 10: Added missing cy="70" on circle -->
+                            <svg class="donut-svg" width="140" height="140" viewBox="0 0 140 140" id="donut-svg">
+                                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--bg-3)" stroke-width="16"/>
+                            </svg> 
+                            <div class="donut-legend" id="donut-legend"></div>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="grid-column: 1 / -1;">
+                        <div class="chart-title">Recent Activity</div>
+                        <div class="activity-feed" id="activity-feed">
+                            <div class="activity-item">
+                                <div class="activity-dot" style="background: var(--accent-1)"></div>
+                                <div>
+                                    <div class="activity-text">System initialized - student database connected</div>
+                                    <div class="activity-time">Just now</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END charts-grid -->
+
+            </div>
+            <!-- END page-dashboard -->
+        
+            <!-- =====================STUDENT PAGE================================ -->
+            <div class="page-content" id="page-students">
+                <div class="filters-row">
+                    <div class="filter-chips" id="status-chips">
+                        <!-- Fixed: only "All" chip should be active by default -->
+                        <div class="chip active" data-status="">All</div>
+                        <div class="chip" data-status="Active">Active</div>
+                        <div class="chip" data-status="Inactive">Inactive</div>
+                        <div class="chip" data-status="Graduated">Graduated</div>
+                        <div class="chip" data-status="Suspended">Suspended</div>
+                    </div>
+                    <select class="filter-select" id="dep-filter">
+                        <option value="">All Departments</option>
+                    </select>
+                    <select class="filter-select" id="gender-filter">
+                        <option value="">All Genders</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </select>
+                    <div style="margin-left: auto; display: flex; gap: 8px; align-items:center;">
+                        <span style="font-size: 12px; color: var(--text-3)" id="result-count"></span>
+                        <div class="view-toggle">
+                            <button class="view-btn active" id="view-table-btn" onclick="setView('table')" title="Table View">☰</button>
+                            <button class="view-btn" id="view-card-btn" onclick="setView('card')" title="Card View">⊞</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TABLE VIEW -->
+                <div id="table-view">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="select-all" style="accent-color:var(--accent-1)"></th>
+                                    <th onclick="sortTable('name')" class="sorted">Student<span class="sort-icon">↕</span></th>
+                                    <th onclick="sortTable('department')">Department<span class="sort-icon">↕</span></th>
+                                    <th onclick="sortTable('gpa')">GPA <span class="sort-icon">↕</span></th>
+                                    <th onclick="sortTable('status')">Status <span class="sort-icon">↕</span></th>
+                                    <th onclick="sortTable('enrollment')">Enrollment <span class="sort-icon">↕</span></th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-tbody">
+                                <tr class="loading-row"><td colspan="7"><div class="spinner"></div></td></tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination" id="pagination-wrap">
+                            <span class="pagination-info" id="page-info"></span>
+                            <div class="pagination-controls" id="page-controls"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CARD VIEW (hidden by default) -->
+                <div id="card-view" style="display: none">
+                    <div class="students-card-grid" id="student-card-grid"></div>
+                </div>
+            </div>
+            <!-- END page-students -->
+        
+            <!-- =======================DEPARTMENT PAGE============================ -->
+            <div class="page-content" id="page-departments">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Departments</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Department Name</th>
+                                        <th>Head of Department</th>
+                                        <th>Students</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dept-tbody">
+                                    <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-3)">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END page-departments -->
+
+            <!-- =================COURSES PAGE=========================== -->
+            <div class="page-content" id="page-courses">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Course Catalog</span></div>
+                    <div class="card-body">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Code</th><th>Course Name</th><th>Department</th><th>Credits</th>
+                                    </tr>
+                                </thead> 
+                                <tbody id="course-tbody">
+                                    <tr><td colspan="4" style="text-align: center; padding: 40px; color:var(--text-3)">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END page-courses -->
+
+            <!-- ============REPORTS PAGE===================================== -->
+            <div class="page-content" id="page-reports">
+                <div class="card">
+                    <div class="card-body">
+                        <p style="color: var(--text-2); margin-bottom: 20px;">Export and analyze student data across all dimensions.</p>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" onclick="exportCSV()">📄 Export CSV</button>
+                            <button class="btn btn-secondary" onclick="exportJSON()">{ } Export JSON</button>
+                            <button class="btn btn-secondary" onclick="printReport()">🖨 Print Report</button>
+                        </div>
+                        <div id="report-charts" style="margin-top: 28px;"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- END page-reports -->
+
+        </main>
+        </div>
+        <!-- END .app -->
+
+        <!-- ===========ADD/EDIT STUDENT MODAL================ -->
+        <!-- FIX 11: "model-overlay" → "modal-overlay" -->
+        <div class="modal-overlay" id="student-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <span id="modal-icon">➕</span>
+                    <span class="modal-title" id="modal-title">Add New Student</span>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="student-form" onsubmit="return false;">
+                        <input type="hidden" id="form-id">
+                        <div class="form-grid">
+                            <div class="form-section">Personal Information</div>
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" class="form-input" id="form-fname" required placeholder="First Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" class="form-input" id="form-lname" required placeholder="Last Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" class="form-input" id="form-email" required placeholder="student@university.edu">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Phone *</label>
+                                <input type="tel" class="form-input" id="form-phone" required placeholder="00000-00000">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Date of Birth *</label>
+                                <input type="date" class="form-input" id="form-dob">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Gender *</label>
+                                <select class="form-select" id="form-gender">
+                                    <option value="">Select Gender</option>
+                                    <option>Male</option><option>Female</option><option>Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-section">Academic Information</div>
+                            <div class="form-group">
+                                <label>Student ID</label>
+                                <!-- FIX 14: "from-sid" → "form-sid" -->
+                                <input type="text" class="form-input" id="form-sid" placeholder="Auto generated">
+                            </div>
+                            <div class="form-group">
+                                <label>Department *</label>
+                                <select class="form-select" id="form-dept" required>
+                                    <option value="">Select Department</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-select" id="form-status">
+                                    <option>Active</option><option>Inactive</option>
+                                    <option>Graduated</option><option>Suspended</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>GPA</label>
+                                <input type="number" class="form-input" id="form-gpa" min="0" max="4" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="form-group">
+                                <label>Enrollment Date</label>
+                                <input type="date" class="form-input" id="form-enroll">
+                            </div>
+                            
+                            <div class="form-section">Address</div>
+                            <div class="form-group full">
+                                <label>Address</label>
+                                <textarea class="form-textarea" id="form-address" placeholder="Full address..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!-- FIX 12: "closeModel()" → "closeModal()" -->
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveStudent()">
+                        <span id="save-btn-text">Save Student</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================VIEW STUDENT MODAL=========================== -->
+        <!-- FIX 11: "model-overlay" → "modal-overlay" -->
+        <div class="modal-overlay" id="view-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <span>👤</span>
+                    <span class="modal-title">Student Profile</span>
+                    <button class="modal-close" onclick="closeViewModal()">✕</button>
+                </div>
+                <div class="modal-body" id="view-modal-body"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeViewModal()">Close</button>
+                    <button class="btn btn-primary" id="view-edit-btn">Edit Student</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- =======================CONFIRM DELETE MODAL======================== -->
+        <div class="modal-overlay" id="delete-modal">
+            <div class="modal" style="max-width: 420px;">
+                <div class="modal-header">
+                    <span>🗑</span>
+                    <span class="modal-title">Delete Student?</span>
+                    <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-1); line-height: 1.7" id="delete-modal-text">
+                        This will permanently delete the student and all associated records. This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                    <!-- FIX 13: "confirm-delete=btn" → "confirm-delete-btn" -->
+                    <button class="btn btn-danger" id="confirm-delete-btn">Delete Permanently</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ==================TOAST CONTAINER============================== -->
+        <div class="toast-container" id="toast-container"></div>
+
+        <script src="sms.js"></script>
+    </body>
+</html>
